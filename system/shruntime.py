@@ -118,16 +118,10 @@ class ShRuntime(object):
 
         if not no_rcfile and os.path.exists(self.rcfile) and os.path.isfile(self.rcfile):
             try:
-                if PY3:
-                    with open(self.rcfile, encoding="utf-8") as ins:
-                        self.stash(ins.readlines(),
-                                   persistent_level=1,
-                                   add_to_history=False, add_new_inp_line=False)
-                else:
-                    with open(self.rcfile) as ins:
-                        self.stash(ins.readlines(),
-                                   persistent_level=1,
-                                   add_to_history=False, add_new_inp_line=False)
+                with open(self.rcfile) as ins:
+                    self.stash(ins.readlines(),
+                               persistent_level=1,
+                               add_to_history=False, add_new_inp_line=False)
             except IOError:
                 self.stash.write_message('%s: error reading rcfile\n' % self.rcfile)
 
@@ -545,15 +539,12 @@ class ShRuntime(object):
         self.handle_PYTHONPATH()  # Make sure PYTHONPATH is honored
 
         try:
-            if PY3:
-                with open(file_path, "rU", encoding="utf-8") as f:
-                    content = f.read()
-            else:
-                with open(file_path, "rU") as f:
-                    content = f.read()
-            code = compile(
-                content, file_path, "exec", dont_inherit=True)
-            exec(code, namespace, namespace)
+            with open(file_path, "rU") as f:
+                content = f.read()
+                code = compile(
+                    content, file_path, "exec", dont_inherit=True
+                    )
+                exec(code, namespace, namespace)
             
             current_state.return_value = 0
 
