@@ -7,16 +7,35 @@ import argparse
 import requests
 
 try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
+try:
     import clipboard
 except ImportError:
     pass
+
 
 def main(args):
     ap = argparse.ArgumentParser()
     ap.add_argument('url', nargs='?', help='the url to read (default to clipboard')
     ap.add_argument('-o', '--output-file', help='write output to file instead of stdout')
-    ap.add_argument('-X', '--request-method', default='GET', choices=['GET', 'POST', 'HEAD'],
-                    help='specify request method to use (default to GET)')
+    ap.add_argument(
+        '-O',
+        '--remote-name',
+        action='store_true',
+        help='write output to a local file named like the remote file we get'
+    )
+    ap.add_argument(
+        '-X',
+        '--request-method',
+        default='GET',
+        choices=['GET',
+                 'POST',
+                 'HEAD'],
+        help='specify request method to use (default to GET)'
+    )
     ap.add_argument('-H', '--header', help='Custom header to pass to server (H)')
     ap.add_argument('-d', '--data', help='HTTP POST data (H)')
 
@@ -41,6 +60,12 @@ def main(args):
 
     if ns.output_file:
         with open(ns.output_file, 'w') as outs:
+            outs.write(r.text)
+    elif ns.remote_name:
+        # get basename of url
+        url_path = urlparse(url).path
+        filename = url_path.split('/')[-1]
+        with open(filename, 'w') as outs:
             outs.write(r.text)
     else:
         print(r.text)
